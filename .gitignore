@@ -26,3 +26,4 @@ __pycache__
 .env
 project_notes
 dev_journal
+node_modules
