@@ -7,9 +7,7 @@ on:
     branches:
       - main
     paths:
-      - "backend/**"
-      - "market_service/**"
-      - ".github/workflows/backend.yml"
+      - "**"
 
 jobs:
   deploy:
@@ -24,34 +22,16 @@ jobs:
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.AWS_EC2_INSTANCE_SSH_CONNECTION_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.EC2_INSTANCE_SSH_PRIVATE_KEY }}
 
       # Step 3: SSH into EC2 instance and pull the latest changes from the main branch
-      - name: SSH and Pull Repo
+      - name: SSH, Pull Repo, and Deploy Backend
         run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
-            cd portfolio-insights
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST_ADDRESS }} << EOF
+            cd portfolio-insights-backend
             git pull origin main
-          EOF
-
-      # Step 4: Rebuild and restart the FastAPI backend in Docker
-      - name: Deploy Backend
-        run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
-            cd portfolio-insights/backend
             docker stop portfolio-insights-backend || true
             docker rm portfolio-insights-backend || true
-            docker build -t portfolio-insights-backend .
+            docker build --pull -t portfolio-insights-backend .
             docker run -d --name portfolio-insights-backend -p 8001:8001 --env-file .env portfolio-insights-backend
-          EOF
-
-      # Step 5: Compile and run Go-based market microservice
-      - name: Deploy Market Microservice
-        run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
-            cd portfolio-insights/market_service
-            echo "TIINGO_API_KEY=${{ secrets.TIINGO_API_KEY }}" > .env
-            go build -o market-service main.go
-            pkill -f market-service || true
-            nohup ./market-service > market.log 2>&1 &
           EOF
