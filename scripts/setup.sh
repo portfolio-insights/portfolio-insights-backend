@@ -1,16 +1,25 @@
 #!/bin/bash
 
-echo "Setting up pre-commit hooks..."
+echo ""
+echo "📦 Installing pre-commit hook dependencies..."
 npm install
+echo "✅ Done."
 
-echo "Verifying or setting up Python virtual environment..."
+echo ""
+echo "🐍 Setting up Python virtual environment..."
 [ ! -d ".venv" ] && python3 -m venv .venv
+echo "✅ Done."
 
-echo "Activating Python virtual environment..."
+echo ""
+echo "⚡ Activating Python virtual environment..."
 source .venv/bin/activate
+echo "✅ Done."
 
-echo "Upgrading pip and installing Python dependencies..."
+echo ""
+echo "⬆️  Upgrading pip and installing backend dependencies..."
 pip install --upgrade pip
 pip install -r requirements.txt
+echo "✅ Done."
 
-echo "✅ Setup complete."
+echo ""
+echo "🎉 Setup complete."
