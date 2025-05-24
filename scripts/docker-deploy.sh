@@ -18,7 +18,7 @@ echo "✅ Done."
 
 echo ""
 echo "🚀 Spinning up new Docker container..."
-docker run -d --restart unless-stopped --name portfolio-insights-backend -p 8001:8001 --env-file .env portfolio-insights-backend
+docker run -d --restart unless-stopped --name portfolio-insights-backend -p 8001:8001 --env-file .env.docker portfolio-insights-backend
 echo "✅ Done."
 
 echo ""

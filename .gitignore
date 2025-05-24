@@ -24,6 +24,7 @@ lerna-debug.log*
 .venv
 __pycache__
 .env
+.env.docker
 project_notes
 dev_journal
 node_modules
