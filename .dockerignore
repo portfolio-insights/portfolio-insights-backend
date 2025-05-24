@@ -1,3 +1,22 @@
+# Python dependencies and environment
 __pycache__
 .venv
+
+# .env files
 .env
+.env.docker
+.env.example
+
+# CI dependencies and configurations
+.github
+.husky
+.lintstagedrc
+.prettierignore
+node_modules
+package.json
+package-lock.json
+
+# Other directories and files
+.DS_Store
+scripts
+README.md
