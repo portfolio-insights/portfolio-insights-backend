@@ -6,12 +6,8 @@ npm install
 echo "✅ Done."
 
 echo ""
-echo "🐍 Setting up Python virtual environment..."
+echo "🐍 Setting up and activating Python virtual environment..."
 [ ! -d ".venv" ] && python3 -m venv .venv
-echo "✅ Done."
-
-echo ""
-echo "⚡ Activating Python virtual environment..."
 source .venv/bin/activate
 echo "✅ Done."
 
@@ -23,3 +19,4 @@ echo "✅ Done."
 
 echo ""
 echo "🎉 Setup complete."
+echo ""
