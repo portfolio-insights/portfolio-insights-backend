@@ -23,3 +23,4 @@ echo "✅ Done."
 
 echo ""
 echo "🎉 Backend running on Docker."
+echo ""
