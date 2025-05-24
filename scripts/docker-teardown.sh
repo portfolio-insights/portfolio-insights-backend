@@ -13,3 +13,4 @@ echo "✅ Done."
 
 echo ""
 echo "🎉 Docker deployment torn down."
+echo ""
