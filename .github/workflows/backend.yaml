@@ -22,14 +22,38 @@ jobs:
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.EC2_INSTANCE_SSH_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 
-      # Step 3: SSH into EC2 instance and pull the latest changes from the main branch
-      - name: SSH, Pull Repo, and Deploy Backend
+      # Step 3: SSH into EC2 instance and pull latest changes from the main branch
+      - name: SSH and Pull Repo
         run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST_ADDRESS }} << EOF
-            cd portfolio-insights-backend
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << EOF
+            cd portfolio-insights/portfolio-insights-backend
             git pull origin main
+          EOF
+
+      # Step 4: SSH into EC2 instance and generate .env file
+      - name: SSH and Pull Repo
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << EOF
+            cd portfolio-insights/portfolio-insights-backend
+
+            cat > .env.docker << EOL
+            DATABASE_HOST=host.docker.internal
+            DATABASE_PORT=${{ secrets.DATABASE_PORT }}
+            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
+            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
+            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+            CORS_ORIGINS=${{ vars.CORS_ORIGINS }}
+            GO_API_URL=${{ secrets.GO_API_URL }}
+            EOL
+          EOF
+
+      # Step 5: SSH into EC2 instance and deploy backend
+      - name: SSH and Deploy Backend
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << EOF
+            cd portfolio-insights/portfolio-insights-backend
             docker stop portfolio-insights-backend || true
             docker rm portfolio-insights-backend || true
             docker build --pull -t portfolio-insights-backend .
