@@ -32,8 +32,8 @@ jobs:
             git pull origin main
           EOF
 
-      # Step 4: SSH into EC2 instance and generate .env file
-      - name: SSH and Pull Repo
+      # Step 4: SSH into EC2 instance and generate .env.docker file
+      - name: SSH and Generate .env.docker
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << EOF
             cd portfolio-insights/portfolio-insights-backend
