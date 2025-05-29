@@ -38,7 +38,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << EOF
             cd portfolio-insights/portfolio-insights-backend
 
-            echo "DATABASE_HOST=host.docker.internal" > .env.docker
+            echo "DATABASE_HOST=${{ secrets.DATABASE_HOST }}" > .env.docker
             echo "DATABASE_PORT=${{ secrets.DATABASE_PORT }}" >> .env.docker
             echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env.docker
             echo "DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}" >> .env.docker
