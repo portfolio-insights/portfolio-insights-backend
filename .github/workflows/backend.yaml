@@ -38,15 +38,13 @@ jobs:
           ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << EOF
             cd portfolio-insights/portfolio-insights-backend
 
-            cat > .env.docker << EOL
-            DATABASE_HOST=host.docker.internal
-            DATABASE_PORT=${{ secrets.DATABASE_PORT }}
-            DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-            DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
-            DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-            CORS_ORIGINS=${{ vars.CORS_ORIGINS }}
-            GO_API_URL=${{ secrets.GO_API_URL }}
-            EOL
+            echo "DATABASE_HOST=host.docker.internal" > .env.docker
+            echo "DATABASE_PORT=${{ secrets.DATABASE_PORT }}" >> .env.docker
+            echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env.docker
+            echo "DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}" >> .env.docker
+            echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env.docker
+            echo "CORS_ORIGINS=${{ vars.CORS_ORIGINS }}" >> .env.docker
+            echo "GO_API_URL=${{ secrets.GO_API_URL }}" >> .env.docker
           EOF
 
       # Step 5: SSH into EC2 instance and deploy backend
