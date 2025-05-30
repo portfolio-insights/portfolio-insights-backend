@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 echo ""
 echo "📦 Installing pre-commit hook dependencies..."
