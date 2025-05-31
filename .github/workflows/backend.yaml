@@ -43,7 +43,7 @@ jobs:
             echo "DATABASE_NAME=${{ secrets.DATABASE_NAME }}" >> .env.docker
             echo "DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}" >> .env.docker
             echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env.docker
-            echo "CORS_ORIGINS=${{ vars.CORS_ORIGINS }}" >> .env.docker
+            echo "CORS_ORIGINS=${{ vars.FRONTEND_URL }}" >> .env.docker
             echo "GO_API_URL=${{ secrets.GO_API_URL }}" >> .env.docker
           EOF
 
