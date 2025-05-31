@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+trap 'echo "❌ Docker teardown failed."' ERR
 
 echo ""
 echo "🛑 Stopping Docker container..."

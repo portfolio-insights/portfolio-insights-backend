@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+trap 'echo "❌ Docker deployment failed."' ERR
 
 echo ""
 echo "🛑 Stopping old Docker container..."
