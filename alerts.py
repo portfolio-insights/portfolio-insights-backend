@@ -9,7 +9,7 @@ from typing import List, Dict, Any
 from schemas import Alert
 
 
-def search(search_term: str) -> List[Dict[str, Any]]:
+def search(user_id: int, search_term: str) -> List[Dict[str, Any]]:
     """
     Search stock price alerts by a search term.
     """
@@ -17,7 +17,10 @@ def search(search_term: str) -> List[Dict[str, Any]]:
     # Use wildcards (%) to match prefix, suffix, or substring
     ilike_argument = "%" + search_term + "%"
     with database.connection.cursor() as cur:
-        cur.execute("SELECT * FROM alerts WHERE ticker ILIKE %s;", (ilike_argument,))
+        cur.execute(
+            "SELECT * FROM alerts WHERE ticker ILIKE %s AND user_id = %s;",
+            (ilike_argument, user_id),
+        )
         # Extract column names from the result metadata
         keys = [column[0] for column in cur.description]
         all_alerts = cur.fetchall()
