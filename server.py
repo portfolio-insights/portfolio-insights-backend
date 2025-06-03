@@ -170,9 +170,9 @@ async def check_alert(
 
 # Get alerts matching optional search_term
 @app.get("/alerts", response_model=List[Dict])
-async def search_alerts(search_term: str = "") -> List[Dict]:
+async def search_alerts(user_id: int, search_term: str = "") -> List[Dict]:
     try:
-        return alerts.search(search_term)
+        return alerts.search(user_id, search_term)
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -180,9 +180,9 @@ async def search_alerts(search_term: str = "") -> List[Dict]:
 
 # Endpoint to create a new alert
 @app.post("/alerts", status_code=status.HTTP_201_CREATED)
-def create_alert(alert: Alert) -> Dict[str, str | int]:
+def create_alert(user_id: int, alert: Alert) -> Dict[str, str | int]:
     try:
-        alert_id = alerts.create(alert)
+        alert_id = alerts.create(user_id, alert)
         return {"message": "Alert created successfully", "new_alert_id": alert_id}
     except Exception as e:
         print(e)
@@ -191,9 +191,9 @@ def create_alert(alert: Alert) -> Dict[str, str | int]:
 
 # Delete alert by ID (query parameter)
 @app.delete("/alerts")
-def delete_alert(id: int) -> Dict[str, str | int]:
+def delete_alert(user_id: int, id: int) -> Dict[str, str | int]:
     try:
-        alerts.delete(id)
+        alerts.delete(user_id, id)
         return {"message": "Alert deleted successfully", "deleted_alert_id": id}
     except Exception as e:
         print(e)
