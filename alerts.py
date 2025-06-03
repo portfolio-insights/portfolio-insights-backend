@@ -13,7 +13,9 @@ def search(user_id: int, search_term: str) -> List[Dict[str, Any]]:
     """
     Search stock price alerts by a search term.
     """
-    logger.debug("Fetching alerts for search_term: %s", search_term)
+    logger.debug(
+        "Fetching alerts for user #%s and search_term: %s", user_id, search_term
+    )
     # Use wildcards (%) to match prefix, suffix, or substring
     ilike_argument = "%" + search_term + "%"
     with database.connection.cursor() as cur:
