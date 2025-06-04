@@ -108,13 +108,16 @@ def trigger(id: int) -> None:
     """
     Triggers an alert based on its id.
     """
+    logger.debug("Triggering alert #%s...", id)
     with database.connection.cursor() as cur:
+        trigger_time = datetime.now(timezone.utc)
         cur.execute(
             """
                 UPDATE alerts
                 SET triggered = true, triggered_time = %s, expired = NULL, expiration_time = NULL
                 WHERE alert_id = %s;
                 """,
-            (datetime.now(timezone.utc), id),
+            (trigger_time, id),
         )
         database.connection.commit()
+    logger.debug("Alert triggered at %s", trigger_time)
