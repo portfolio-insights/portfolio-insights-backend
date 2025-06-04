@@ -35,7 +35,10 @@ def create(alert: Alert) -> int:
     """
     Create a new stock price alert. Note that the alert id will be automatically created in the database using SERIAL.
     """
+    logger.debug("Creating alert...")
+
     # Convert Pydantic model to plain dict and set 'expired' status
+    logger.debug("Transforming alert Pydantic model to plain dict..")
     alert = alert.dict()
     if alert["expiration_time"]:
         alert["expired"] = False
@@ -52,7 +55,9 @@ def create(alert: Alert) -> int:
             alert,
         )
         database.connection.commit()
-        return cur.fetchone()[0]  # Return the newly created alert id
+        new_alert_id = cur.fetchone()[0]
+        logger.debug("Created alert #%s for user %s", new_alert_id, alert["user_id"])
+        return new_alert_id
 
 
 def delete(id: int) -> None:
