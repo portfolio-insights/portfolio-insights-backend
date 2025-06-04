@@ -64,9 +64,11 @@ def delete(id: int) -> None:
     """
     Delete a stock price alert by id.
     """
+    logger.debug("Deleting alert #%s...", id)
     with database.connection.cursor() as cur:
         cur.execute("DELETE FROM alerts WHERE alert_id = %s RETURNING alert_id;", (id,))
         database.connection.commit()
+    logger.debug("Deletion successful")
 
 
 # THE EVALUATE FUNCTION WILL NOT WORK BECAUSE IT HAS NOT YET BEEN REFACTORED TO CONNECT TO MAIN.GO INSTEAD OF MARKET.PY
