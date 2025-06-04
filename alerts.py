@@ -46,8 +46,8 @@ def create(alert: Alert) -> int:
     with database.connection.cursor() as cur:
         cur.execute(
             """
-                INSERT INTO alerts (ticker, price, direction, expired, expiration_time)
-                VALUES (%(ticker)s, %(price)s, %(direction)s, %(expired)s, %(expiration_time)s) RETURNING alert_id;
+                INSERT INTO alerts (user_id, ticker, price, direction, expired, expiration_time)
+                VALUES (%(user_id)s, %(ticker)s, %(price)s, %(direction)s, %(expired)s, %(expiration_time)s) RETURNING alert_id;
                 """,
             alert,
         )

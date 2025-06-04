@@ -180,9 +180,9 @@ async def search_alerts(user_id: int, search_term: str = "") -> List[Dict]:
 
 # Endpoint to create a new alert
 @app.post("/alerts", status_code=status.HTTP_201_CREATED)
-def create_alert(user_id: int, alert: Alert) -> Dict[str, str | int]:
+def create_alert(alert: Alert) -> Dict[str, str | int]:
     try:
-        alert_id = alerts.create(user_id, alert)
+        alert_id = alerts.create(alert)
         return {"message": "Alert created successfully", "new_alert_id": alert_id}
     except Exception as e:
         print(e)

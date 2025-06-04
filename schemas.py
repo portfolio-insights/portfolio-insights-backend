@@ -12,6 +12,7 @@ from typing import Optional
 
 # Used in POST /alerts for automatic validation and parsing
 class Alert(BaseModel):
+    user_id: int
     ticker: str  # 1-10 characters, enforced in database
     price: float
     direction: str  # 'above' or 'below'
