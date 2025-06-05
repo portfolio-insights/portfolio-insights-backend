@@ -28,7 +28,7 @@ Log out and back in to apply Docker group permissions.
 ## 🧬 2. Clone the Project Repository
 
 ```bash
-git clone https://github.com/jakubstetz/portfolio-insights.git
+git clone https://github.com/jakubstetz/portfolio-insights-backend.git
 ```
 
 Once the project is cloned onto the EC2 instance, running the "Deploy Backend to EC2" workflow (`backend.yaml`) in GitHub Actions will deploy the backend.
