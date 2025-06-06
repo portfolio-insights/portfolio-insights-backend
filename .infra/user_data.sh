@@ -24,7 +24,8 @@ git clone https://github.com/jakubstetz/portfolio-insights-backend.git
 # NGINX reverse proxy setup
 cd portfolio-insights-backend/.infra
 cp nginx_portfolio-insights.conf /etc/nginx/conf.d/portfolio-insights.conf
-sudo systemctl restart nginx
+systemctl enable nginx
+systemctl restart nginx
 
 # Certbot setup information message
 echo ""
