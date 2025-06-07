@@ -1,6 +1,6 @@
 # EC2 Setup Guide for Portfolio Insights
 
-This document outlines the standard setup for launching and configuring an EC2 instance to run the Portfolio Insights backend using Docker and NGINX on Amazon Linux 2023.
+This document outlines the standard setup for launching and configuring an EC2 instance to run the Portfolio Insights backend using Docker and NGINX on Amazon Linux 2023. After SSHing into your EC2 instance, execute steps 1-4.
 
 ---
 
@@ -78,6 +78,22 @@ sudo certbot --nginx -d api.portfolio-insights.jakubstetz.dev
 
 > Note:
 > First-time use of Certbot requires manual input of your email for notifications, as well as acceptance of terms of service and agreement/disagreement to share address with the Electronic Frontier Foundation.
+
+---
+
+## 🗄️ 5. Database Setup
+
+For the backend to run, you will need to create a new database with properly-formatted tables. This can be done either from your EC2 instance or from your local environment using the `psql` command line tool. After setting up an RDS instance on AWS, run the following SQL files in order to create the necessary tables:
+
+```bash
+psql -h <your-rds-endpoint> -U <your-username> -d <your-database-name> -f sql/create_users_table.sql
+psql -h <your-rds-endpoint> -U <your-username> -d <your-database-name> -f sql/create_alerts_table.sql
+```
+
+> Note:
+>
+> - The order of these commands matters as `alerts` table has a foreign key dependency on `users` table.
+> - `populate_users_table.sql` and `populate_alerts_table.sql` can be used to populate the new tables with dummy data if desired.
 
 ---
 
