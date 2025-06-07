@@ -33,5 +33,5 @@ echo "Because first-time use of Certbot requires user interaction, SSL setup wit
 
 # Completion message
 echo ""
-echo "✅ EC2 setup complete. Run backend.yaml workflow in GitHub Actions to deploy backend, and then visit https://api.portfolio-insights.jakubstetz.dev/health to check system health."
+echo "✅ EC2 setup complete. Run backend.yaml workflow in GitHub Actions to deploy backend, and then visit https://api.portfolio-insights.jakubstetz.dev/health to check system health. Note that database will need to be set up separately."
 echo ""
