@@ -2,11 +2,11 @@
 Manage stock price alerts through interaction with the PostgreSQL database.
 """
 
-import database
+from src import database
+from src.schemas import Alert
+from src.logging import logger
 from datetime import datetime, timezone
-from utils.logging import logger
 from typing import List, Dict, Any
-from schemas import Alert
 
 
 def search(user_id: int, search_term: str) -> List[Dict[str, Any]]:

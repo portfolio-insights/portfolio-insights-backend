@@ -10,7 +10,7 @@ for connection string format.
 
 import os
 import psycopg as postgres
-from utils.logging import logger
+from src.logging import logger
 
 # Initialize to satisfy module scope before first use
 connection = None

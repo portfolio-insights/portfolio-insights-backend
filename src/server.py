@@ -9,7 +9,7 @@ Start the server by running the shell command:
 fastapi dev server.py
 """
 
-from utils.logging import logger
+from src.logging import logger
 
 logger.info("Starting Portfolio Insights backend")
 logger.info("Importing modules...")
@@ -17,9 +17,8 @@ logger.info("Importing modules...")
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
-import alerts
-import database
-from schemas import Alert
+from src import alerts, database
+from src.schemas import Alert
 from typing import List, Dict
 import os
 from dotenv import load_dotenv
