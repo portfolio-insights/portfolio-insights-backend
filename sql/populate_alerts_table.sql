@@ -1,5 +1,7 @@
--- Test data for alerts table
--- Assumes user_id 1 exists in the users table
+-- The queries in this file are used to populate the `alerts` table with dummy
+-- data, consisting of alerts in various states. Useful for testing.
+--
+-- Assumes that a user with id = 1 exists in the `users` table.
 
 -- Active alerts
 INSERT INTO alerts (user_id, ticker, price, direction, creation_time, triggered, expired)

@@ -1,5 +1,5 @@
--- Test users for development
--- Note: In production, passwords should be properly hashed
+-- The queries in this file are used to populate the `users` table with test
+-- data, consisting of two users. Useful for testing.
 
 INSERT INTO users (username, password, created_at)
 VALUES 
