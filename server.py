@@ -191,9 +191,9 @@ def create_alert(alert: Alert) -> Dict[str, str | int]:
 
 # Delete alert by ID (query parameter)
 @app.delete("/alerts")
-def delete_alert(user_id: int, id: int) -> Dict[str, str | int]:
+def delete_alert(id: int) -> Dict[str, str | int]:
     try:
-        alerts.delete(user_id, id)
+        alerts.delete(id)
         return {"message": "Alert deleted successfully", "deleted_alert_id": id}
     except Exception as e:
         print(e)
