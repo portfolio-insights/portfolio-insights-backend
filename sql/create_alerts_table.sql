@@ -1,8 +1,11 @@
 -- Creates the `alerts` table for storing user-specific stock price alerts.
 -- Alerts are linked to a `users` table via a foreign key.
 --
--- This table is intended for use with the Portfolio Insights backend
--- and supports multi-user alert tracking with cascading deletes on user removal.
+-- This table is intended for use with the Portfolio Insights backend and
+-- supports multi-user alert tracking with cascading deletes on user removal.
+--
+-- Because it references the `users` table via a foreign key, the `users`
+-- table must be created prior to this table.
 
 CREATE TABLE alerts(
     alert_id SERIAL PRIMARY KEY,
