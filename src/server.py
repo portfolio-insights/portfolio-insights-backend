@@ -14,17 +14,20 @@ from src.logging import logger
 logger.info("Starting Portfolio Insights backend")
 logger.info("Importing modules...")
 
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
-from src import alerts, database
-from src.schemas import Alert
+from src import alerts, database, users
+from src.schemas import Alert, Token, UserLogin
 from typing import List, Dict
 import os
 from dotenv import load_dotenv
 
 logger.info("Modules loaded")
 
+# OAuth2 scheme for token authentication
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 load_dotenv()
 logger.info(f"Environment loaded:")
@@ -34,7 +37,6 @@ for key, value in os.environ.items():
 cors_origins = os.getenv("CORS_ORIGINS").split(",")
 go_api_url = os.getenv("GO_API_URL")
 
-
 app = FastAPI()
 
 app.add_middleware(
@@ -43,6 +45,75 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ------------------------------------------------------------------------#
+
+##### Authentication Endpoints #####
+
+
+@app.post("/token", response_model=Token)
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    """
+    Login endpoint that returns a JWT token for authenticated users.
+    """
+    # Verify user credentials, raise error if user not found or password is incorrect
+    user_info = users.verify_credentials(form_data.username, form_data.password)
+    # If no error was raised, create access token
+    access_token = users.create_access_token(data=user_info)
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+# ------------------------------------------------------------------------#
+
+##### Protected Endpoints #####
+
+
+# Get alerts matching optional search_term
+@app.get("/alerts", response_model=List[Dict])
+async def search_alerts(
+    search_term: str = "",
+    current_user: Dict[str, str | int] = Depends(users.get_user_from_token),
+) -> List[Dict]:
+    try:
+        return alerts.search(current_user["user_id"], search_term)
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+# Endpoint to create a new alert
+@app.post("/alerts", status_code=status.HTTP_201_CREATED)
+def create_alert(
+    alert: Alert,
+    current_user: Dict[str, str | int] = Depends(users.get_user_from_token),
+) -> Dict[str, str | int]:
+    # Ensure user can only create alerts for themselves
+    # Realistically this is prevented by the UI because a user can only see their own alerts
+    if alert.user_id != current_user["user_id"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Cannot create alerts for other users",
+        )
+    try:
+        alert_id = alerts.create(alert)
+        return {"message": "Alert created successfully", "new_alert_id": alert_id}
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+# Delete alert by ID (query parameter)
+@app.delete("/alerts")
+def delete_alert(
+    id: int, current_user: Dict[str, str | int] = Depends(users.get_user_from_token)
+) -> Dict[str, str | int]:
+    try:
+        alerts.delete(id)
+        return {"message": "Alert deleted successfully", "deleted_alert_id": id}
+    except Exception as e:
+        print(e)
+        return HTTPException(status_code=500, detail="Internal server error")
+
 
 # ------------------------------------------------------------------------#
 
@@ -160,40 +231,3 @@ async def check_alert(
     except Exception as e:
         print(f"Unexpected error: {e}")
         raise HTTPException(status_code=502, detail="Market service unavailable")
-
-
-# ------------------------------------------------------------------------#
-
-##### Manage Stock Price Alerts #####
-
-
-# Get alerts matching optional search_term
-@app.get("/alerts", response_model=List[Dict])
-async def search_alerts(user_id: int, search_term: str = "") -> List[Dict]:
-    try:
-        return alerts.search(user_id, search_term)
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail="Internal server error")
-
-
-# Endpoint to create a new alert
-@app.post("/alerts", status_code=status.HTTP_201_CREATED)
-def create_alert(alert: Alert) -> Dict[str, str | int]:
-    try:
-        alert_id = alerts.create(alert)
-        return {"message": "Alert created successfully", "new_alert_id": alert_id}
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail="Internal server error")
-
-
-# Delete alert by ID (query parameter)
-@app.delete("/alerts")
-def delete_alert(id: int) -> Dict[str, str | int]:
-    try:
-        alerts.delete(id)
-        return {"message": "Alert deleted successfully", "deleted_alert_id": id}
-    except Exception as e:
-        print(e)
-        return HTTPException(status_code=500, detail="Internal server error")
