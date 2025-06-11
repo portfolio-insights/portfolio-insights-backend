@@ -17,3 +17,19 @@ class Alert(BaseModel):
     price: float
     direction: str  # 'above' or 'below'
     expiration_time: Optional[datetime]  # ISO 8601 string will be automatically parsed
+
+
+# Authentication schemas
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    user_id: int
+    username: str
+
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
