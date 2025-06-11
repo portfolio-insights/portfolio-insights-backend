@@ -56,11 +56,20 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """
     Login endpoint that returns a JWT token for authenticated users.
     """
-    # Verify user credentials, raise error if user not found or password is incorrect
-    user_info = users.verify_credentials(form_data.username, form_data.password)
-    # If no error was raised, create access token
-    access_token = users.create_access_token(data=user_info)
-    return {"access_token": access_token, "token_type": "bearer"}
+    try:
+        # Verify user credentials, raise error if user not found or password is incorrect
+        user_info = users.verify_credentials(form_data.username, form_data.password)
+        # If no error was raised, create access token
+        access_token = users.create_access_token(data=user_info)
+        return {"access_token": access_token, "token_type": "bearer"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error during login: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred during login",
+        )
 
 
 # ------------------------------------------------------------------------#
