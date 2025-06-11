@@ -39,7 +39,7 @@ def create(alert: Alert) -> int:
 
     # Convert Pydantic model to plain dict and set 'expired' status
     logger.debug("Transforming alert Pydantic model to plain dict..")
-    alert = alert.dict()
+    alert = alert.model_dump()
     if alert["expiration_time"]:
         alert["expired"] = False
     else:
