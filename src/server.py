@@ -51,7 +51,7 @@ app.add_middleware(
 ##### Authentication Endpoints #####
 
 
-@app.post("/token", response_model=Token)
+@app.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """
     Login endpoint that returns a JWT token for authenticated users.
