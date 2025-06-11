@@ -68,16 +68,20 @@ def get_user_from_token(token: str) -> Dict[str, str | int]:
     """
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("username")
-        user_id: int = payload.get("user_id")
-        if not username or not user_id:
+        user_id, username, expiration = (
+            payload["user_id"],
+            payload["username"],
+            payload["exp"],
+        )
+        # Verify valid token payload
+        if not username or not user_id or not expiration:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token payload",
                 headers={"WWW-Authenticate": "Bearer"},
             )
         # Check if token has expired
-        expired = datetime.now(UTC).timestamp() > payload["exp"]
+        expired = datetime.now(UTC).timestamp() > expiration
         if expired:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
