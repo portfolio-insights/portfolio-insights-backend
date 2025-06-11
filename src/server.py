@@ -19,7 +19,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 from src import alerts, database, users
-from src.schemas import Alert, Token, UserLogin
+from src.schemas import Alert, Token, UserLogin, AlertResponse
 from typing import List, Dict
 import os
 from dotenv import load_dotenv
@@ -77,16 +77,16 @@ async def search_alerts(
     try:
         return alerts.search(current_user["user_id"], search_term)
     except Exception as e:
-        print(e)
+        logger.error(f"Error searching alerts: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # Endpoint to create a new alert
-@app.post("/alerts", status_code=status.HTTP_201_CREATED)
+@app.post("/alerts", status_code=status.HTTP_201_CREATED, response_model=AlertResponse)
 def create_alert(
     alert: Alert,
     current_user: Dict[str, str | int] = Depends(users.get_user_from_token),
-) -> Dict[str, str | int]:
+) -> AlertResponse:
     # Ensure user can only create alerts for themselves
     # Realistically this is prevented by the UI because a user can only see their own alerts
     if alert.user_id != current_user["user_id"]:
@@ -96,23 +96,25 @@ def create_alert(
         )
     try:
         alert_id = alerts.create(alert)
-        return {"message": "Alert created successfully", "new_alert_id": alert_id}
+        return AlertResponse(
+            message="Alert created successfully", new_alert_id=alert_id
+        )
     except Exception as e:
-        print(e)
+        logger.error(f"Error creating alert: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # Delete alert by ID (query parameter)
-@app.delete("/alerts")
+@app.delete("/alerts", response_model=AlertResponse)
 def delete_alert(
     id: int, current_user: Dict[str, str | int] = Depends(users.get_user_from_token)
-) -> Dict[str, str | int]:
+) -> AlertResponse:
     try:
         alerts.delete(id)
-        return {"message": "Alert deleted successfully", "deleted_alert_id": id}
+        return AlertResponse(message="Alert deleted successfully", deleted_alert_id=id)
     except Exception as e:
-        print(e)
-        return HTTPException(status_code=500, detail="Internal server error")
+        logger.error(f"Error deleting alert: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # ------------------------------------------------------------------------#

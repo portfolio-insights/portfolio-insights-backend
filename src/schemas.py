@@ -51,3 +51,10 @@ class TokenData(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
+
+
+# Response schemas
+class AlertResponse(BaseModel):  # Alert creation/deletion response
+    message: str
+    new_alert_id: Optional[int] = None
+    deleted_alert_id: Optional[int] = None
