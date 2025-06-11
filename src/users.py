@@ -42,7 +42,6 @@ def verify_credentials(username: str, password: str) -> Dict[str, str | int]:
         result = cur.fetchone()
 
         if not result:
-            # 404 doesn't need auth headers as it's not an auth issue
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
@@ -53,11 +52,8 @@ def verify_credentials(username: str, password: str) -> Dict[str, str | int]:
         if password == stored_password:
             return {"user_id": user_id, "username": username}
 
-        # 401 includes auth headers to indicate Bearer token auth is required
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid password",
-            headers={"WWW-Authenticate": "Bearer"},
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password"
         )
 
 
