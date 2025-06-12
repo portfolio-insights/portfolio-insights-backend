@@ -1,8 +1,7 @@
 """
 Defines Pydantic data models for API requests and responses.
 
-This module includes schemas used for validation and serialization
-in FastAPI endpoints.
+This module includes schemas used for validation and serialization in FastAPI endpoints.
 """
 
 from pydantic import BaseModel, field_validator
@@ -35,6 +34,14 @@ class Alert(BaseModel):
         if not 1 <= len(v) <= 10:
             raise ValueError("ticker must be between 1 and 10 characters")
         return v.upper()  # Normalize to uppercase
+
+    # Validate expiration time is in the future
+    @field_validator("expiration_time")
+    @classmethod
+    def validate_expiration_time(cls, v):
+        if v is not None and v <= datetime.now():
+            raise ValueError("expiration time must be in the future")
+        return v
 
 
 # Authentication schemas
