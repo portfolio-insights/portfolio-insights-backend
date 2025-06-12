@@ -33,12 +33,13 @@ def search(user_id: int, search_term: str) -> List[Dict[str, Any]]:
 
 def create(alert: Alert) -> int:
     """
-    Create a new stock price alert. Note that the alert id will be automatically created in the database using SERIAL.
+    Create a new stock price alert.
+    Note that the alert id will be automatically created in the database using SERIAL.
     """
     logger.debug("Creating alert...")
 
     # Convert Pydantic model to plain dict and set 'expired' status
-    logger.debug("Transforming alert Pydantic model to plain dict..")
+    logger.debug("Transforming alert Pydantic model to plain dict...")
     alert = alert.model_dump()
     if alert["expiration_time"]:
         alert["expired"] = False
