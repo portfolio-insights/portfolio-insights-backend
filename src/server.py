@@ -62,8 +62,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         # If no error was raised, create access token
         access_token = users.create_access_token(data=user_info)
         return {"access_token": access_token, "token_type": "bearer"}
-    except HTTPException:
-        raise
+    except HTTPException as http_exc:
+        # Re-raise the HTTP exception with its original status code and detail
+        raise HTTPException(status_code=http_exc.status_code, detail=http_exc.detail)
     except Exception as e:
         logger.error(f"Unexpected error during login: {e}")
         raise HTTPException(
