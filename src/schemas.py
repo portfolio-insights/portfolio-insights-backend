@@ -60,6 +60,33 @@ class UserLogin(BaseModel):
     password: str
 
 
+class UserRegister(BaseModel):
+    username: str
+    password: str
+
+    # Validate username length
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, v):
+        if not 2 <= len(v) <= 30:
+            raise ValueError("username must be between 2 and 30 characters")
+        return v
+
+    # Validate password length
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v):
+        if not 8 <= len(v) <= 50:
+            raise ValueError("password must be between 8 and 50 characters")
+        return v
+
+
+class UserResponse(BaseModel):
+    user_id: int
+    username: str
+    created_at: datetime
+
+
 # Response schemas
 class AlertResponse(BaseModel):  # Alert creation/deletion response
     message: str
