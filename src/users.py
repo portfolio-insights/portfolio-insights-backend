@@ -85,7 +85,7 @@ def get_user_from_token(token: str) -> Dict[str, str | int]:
                 detail="Token has expired",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        return {"username": username, "user_id": user_id}
+        return {"user_id": user_id, "username": username}
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
