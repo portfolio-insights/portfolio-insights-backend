@@ -19,18 +19,6 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", "30"))
 
 
-def create_access_token(data: dict) -> str:
-    """
-    Create a JWT access token with the given data and a 30-minute expiration time.
-    """
-    to_encode = data.copy()
-    to_encode["exp"] = datetime.now(UTC) + timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
-    )
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-
 def verify_credentials(username: str, password: str) -> Dict[str, str | int]:
     """
     Verify user credentials against the database.
@@ -55,6 +43,18 @@ def verify_credentials(username: str, password: str) -> Dict[str, str | int]:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password"
         )
+
+
+def create_access_token(data: dict) -> str:
+    """
+    Create a JWT access token with the given data and a 30-minute expiration time.
+    """
+    to_encode = data.copy()
+    to_encode["exp"] = datetime.now(UTC) + timedelta(
+        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+    )
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
 
 def get_user_from_token(token: str) -> Dict[str, str | int]:
