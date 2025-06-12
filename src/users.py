@@ -3,7 +3,7 @@ Handle user authentication and session management.
 """
 
 from datetime import datetime, timedelta, UTC
-from typing import Optional, Dict
+from typing import Dict
 from jose import JWTError, jwt
 from fastapi import HTTPException, status
 from src import database
