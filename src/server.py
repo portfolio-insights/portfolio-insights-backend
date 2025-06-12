@@ -19,7 +19,14 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 from src import alerts, database, users
-from src.schemas import Alert, Token, UserLogin, AlertResponse
+from src.schemas import (
+    Alert,
+    Token,
+    UserLogin,
+    AlertResponse,
+    UserRegister,
+    UserResponse,
+)
 from typing import List, Dict
 import os
 from dotenv import load_dotenv
@@ -70,6 +77,34 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred during login",
+        )
+
+
+@app.post(
+    "/register",
+    status_code=status.HTTP_201_CREATED,
+    response_model=Dict[str, Token | UserResponse],
+)
+async def register(user_data: UserRegister):
+    """
+    Register a new user and return a JWT token along with user information.
+    """
+    try:
+        # Register the user
+        user_info = users.register_user(user_data.username, user_data.password)
+        # Create access token for the new user
+        access_token = users.create_access_token(data=user_info)
+        return {
+            "token": {"access_token": access_token, "token_type": "bearer"},
+            "user": UserResponse(**user_info),
+        }
+    except HTTPException as http_exc:
+        raise HTTPException(status_code=http_exc.status_code, detail=http_exc.detail)
+    except Exception as e:
+        logger.error(f"Unexpected error during registration: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred during registration",
         )
 
 
