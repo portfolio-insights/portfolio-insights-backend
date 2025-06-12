@@ -8,6 +8,7 @@ from jose import JWTError, jwt
 from fastapi import HTTPException, status
 from src import database
 from src.logging import logger
+from src.schemas import UserResponse
 import os
 
 # JWT configuration
@@ -45,10 +46,10 @@ def verify_credentials(username: str, password: str) -> Dict[str, str | int]:
         )
 
 
-def register_user(username: str, password: str) -> Dict[str, str | int | datetime]:
+def register_user(username: str, password: str) -> UserResponse:
     """
     Register a new user in the database.
-    Returns dict with user_id, username, and created_at if registration is successful.
+    Returns UserResponse with user_id, username, and created_at if registration is successful.
     Raises HTTPException if username already exists or registration fails.
     """
     with database.connection.cursor() as cur:
@@ -69,7 +70,9 @@ def register_user(username: str, password: str) -> Dict[str, str | int | datetim
             )
             user_id, created_at = cur.fetchone()
             database.connection.commit()
-            return {"user_id": user_id, "username": username, "created_at": created_at}
+            return UserResponse(
+                user_id=user_id, username=username, created_at=created_at
+            )
         except Exception as e:
             # Rolls back changes to database in case of error, to maintain data integrity
             database.connection.rollback()
