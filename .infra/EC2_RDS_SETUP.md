@@ -87,13 +87,17 @@ For the backend to run, you will need to create a new database with properly-for
 
 ```bash
 psql -h <your-rds-endpoint> -U <your-username> -d <your-database-name> -f sql/create_users_table.sql
+psql -h <your-rds-endpoint> -U <your-username> -d <your-database-name> -f sql/populate_users_table.sql
 psql -h <your-rds-endpoint> -U <your-username> -d <your-database-name> -f sql/create_alerts_table.sql
 ```
 
 > Note:
 >
 > - The order of these commands matters as `alerts` table has a foreign key dependency on `users` table.
-> - `populate_users_table.sql` and `populate_alerts_table.sql` can be used to populate the new tables with dummy data if desired.
+> - `populate_users_table.sql` creates a "guest" account.
+>   - This account can be used for testing.
+>   - Also, app users can log in with the guest account rather than registering a new account. This allows users to quickly enter the app to check out its features.
+> - `populate_alerts_table.sql` can be used to populate the `alerts` table with dummy data if desired.
 
 ---
 
