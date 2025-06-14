@@ -96,7 +96,7 @@ async def register(user_data: UserRegister):
         access_token = users.create_access_token(data=user_info)
         return {
             "token": {"access_token": access_token, "token_type": "bearer"},
-            "user": UserResponse(**user_info),
+            "user": user_info,
         }
     except HTTPException as http_exc:
         raise HTTPException(status_code=http_exc.status_code, detail=http_exc.detail)

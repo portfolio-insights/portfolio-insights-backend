@@ -81,10 +81,21 @@ class UserRegister(BaseModel):
         return v
 
 
+# Returned on successful user registration
 class UserResponse(BaseModel):
     user_id: int
     username: str
-    created_at: datetime
+    created_at: int  # Unix timestamp
+
+    # created_at must be an int in order to be serialized to JSON for JWT
+    # mode="before" required because created_at is passed in as a datetime object, and so attempting to save it in a datetime field will cause an error
+    @field_validator("created_at", mode="before")
+    @classmethod
+    def convert_datetime_to_int(cls, v):
+        if isinstance(v, datetime):
+            print("Converting datetime to int...")
+            return int(v.timestamp())
+        return v
 
 
 # Response schemas
