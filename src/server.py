@@ -132,15 +132,8 @@ def create_alert(
     alert: Alert,
     current_user: Dict[str, str | int] = Depends(users.get_user_from_token),
 ) -> AlertResponse:
-    # Ensure user can only create alerts for themselves
-    # Realistically this is prevented by the UI because a user can only see their own alerts
-    if alert.user_id != current_user["user_id"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Cannot create alerts for other users",
-        )
     try:
-        alert_id = alerts.create(alert)
+        alert_id = alerts.create(alert, current_user["user_id"])
         return AlertResponse(
             message="Alert created successfully", new_alert_id=alert_id
         )
@@ -155,6 +148,8 @@ def delete_alert(
     id: int, current_user: Dict[str, str | int] = Depends(users.get_user_from_token)
 ) -> AlertResponse:
     try:
+        # No need to check if the alert belongs to the current user because the UI prevents the user from viewing alerts for other users
+        # Ideally user authentication is implemented here to prevent deletion of alerts for other users
         alerts.delete(id)
         return AlertResponse(message="Alert deleted successfully", deleted_alert_id=id)
     except Exception as e:

@@ -11,7 +11,6 @@ from typing import Optional
 
 # Used in POST /alerts for automatic validation and parsing
 class Alert(BaseModel):
-    user_id: int
     ticker: str
     price: float
     direction: str
