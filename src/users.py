@@ -20,14 +20,17 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", "30"))
 
 
-def verify_credentials(username: str, password: str) -> Dict[str, str | int]:
+def verify_credentials(username: str, password: str) -> UserResponse:
     """
     Verify user credentials against the database.
-    Returns dict with user_id and username if credentials are valid.
+    Returns UserResponse with user_id, username, and created_at if credentials are valid.
     Raises HTTPException if credentials are invalid.
     """
     with database.connection.cursor() as cur:
-        cur.execute("SELECT id, password FROM users WHERE username = %s", (username,))
+        cur.execute(
+            "SELECT id, password, created_at FROM users WHERE username = %s",
+            (username,),
+        )
         result = cur.fetchone()
 
         if not result:
@@ -35,11 +38,13 @@ def verify_credentials(username: str, password: str) -> Dict[str, str | int]:
                 status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
 
-        user_id, stored_password = result
+        user_id, stored_password, created_at = result
 
         # Simple password comparison (no hashing for MVP)
         if password == stored_password:
-            return {"user_id": user_id, "username": username}
+            return UserResponse(
+                user_id=user_id, username=username, created_at=created_at
+            )
 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password"
