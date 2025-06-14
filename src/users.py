@@ -5,7 +5,7 @@ Handle user authentication and session management.
 from datetime import datetime, timedelta, UTC
 from typing import Dict
 from jose import JWTError, jwt
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Request
 from src import database
 from src.logging import logger
 from src.schemas import UserResponse
@@ -94,13 +94,33 @@ def create_access_token(data: UserResponse) -> str:
     return encoded_jwt
 
 
-def get_user_from_token(token: str) -> Dict[str, str | int]:
+def get_user_from_token(request: Request) -> Dict[str, str | int]:
     """
-    Extract and verify user info from JWT token.
+    Extract and verify user info from JWT token in Authorization header.
     Returns dict with user_id and username if token is valid.
     Raises HTTPException if token is invalid or expired.
     """
     try:
+        # Get the Authorization header
+        auth_header = request.headers.get("Authorization")
+        if not auth_header:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Missing Authorization header",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Extract token from "Bearer <token>" format
+        if not auth_header.startswith("Bearer "):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid Authorization header format",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        token = auth_header.split(" ")[1]
+
+        # Rest of the existing token validation code
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id, username, expiration = (
             payload["user_id"],
@@ -119,7 +139,7 @@ def get_user_from_token(token: str) -> Dict[str, str | int]:
         if expired:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token has expired",
+                detail="Token expired",
                 headers={"WWW-Authenticate": "Bearer"},
             )
         return {"user_id": user_id, "username": username}
