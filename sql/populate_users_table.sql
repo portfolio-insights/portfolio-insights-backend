@@ -4,4 +4,4 @@
 
 INSERT INTO users (id, username, password, created_at)
 VALUES 
-    (1, 'Guest', 'GuestPassword', NOW() - INTERVAL '30 days');
+    (-1, 'Guest', 'GuestPassword', NOW() - INTERVAL '30 days');
