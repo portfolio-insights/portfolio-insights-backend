@@ -75,8 +75,8 @@ class UserRegister(BaseModel):
     @field_validator("password")
     @classmethod
     def validate_password(cls, v):
-        if not 8 <= len(v) <= 50:
-            raise ValueError("password must be between 8 and 50 characters")
+        if not 4 <= len(v) <= 50:
+            raise ValueError("password must be between 4 and 50 characters")
         return v
 
 
