@@ -2,6 +2,6 @@
 -- guest user, which can be used for testing and also allows users to
 -- log in with the guest account rather than registering a new account.
 
-INSERT INTO users (username, password, created_at)
+INSERT INTO users (id, username, password, created_at)
 VALUES 
-    ('Guest', 'GuestPassword', NOW() - INTERVAL '30 days');
+    (0, 'Guest', 'GuestPassword', NOW() - INTERVAL '30 days');
