@@ -21,4 +21,5 @@ echo "✅ Done."
 
 echo ""
 echo "🎉 Setup complete."
+echo "🐘 See ./sql for SQL files to set up and populate your database."
 echo ""
