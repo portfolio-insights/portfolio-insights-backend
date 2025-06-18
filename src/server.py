@@ -14,7 +14,8 @@ from src.logging import logger
 logger.info("Starting Portfolio Insights backend")
 logger.info("Importing modules...")
 
-from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi import FastAPI, Request, HTTPException, status, Depends
+from fastapi.exceptions import RequestValidationError
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
@@ -22,7 +23,6 @@ from src import alerts, database, users
 from src.schemas import (
     Alert,
     Token,
-    UserLogin,
     AlertResponse,
     UserRegister,
     UserResponse,
@@ -52,6 +52,20 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(RequestValidationError)
+async def custom_validation_exception_handler(
+    request: Request, exc: RequestValidationError
+):
+    # Get the first validation error message, e.g., "Password must be between 4 and 50 characters."
+    first_error = exc.errors()[0]
+    message = first_error.get("msg", "Invalid input")
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail=message,
+    )
+
 
 # ------------------------------------------------------------------------#
 
