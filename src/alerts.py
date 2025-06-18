@@ -31,15 +31,17 @@ def search(user_id: int, search_term: str) -> List[Dict[str, Any]]:
         return [dict(zip(keys, row)) for row in all_alerts]
 
 
-def create(alert: Alert) -> int:
+def create(alert: Alert, user_id: int) -> int:
     """
-    Create a new stock price alert. Note that the alert id will be automatically created in the database using SERIAL.
+    Create a new stock price alert.
+    Note that the alert id will be automatically created in the database using SERIAL.
     """
     logger.debug("Creating alert...")
 
     # Convert Pydantic model to plain dict and set 'expired' status
-    logger.debug("Transforming alert Pydantic model to plain dict..")
-    alert = alert.dict()
+    logger.debug("Transforming alert Pydantic model to plain dict...")
+    alert = alert.model_dump()
+    alert["user_id"] = user_id
     if alert["expiration_time"]:
         alert["expired"] = False
     else:
@@ -56,7 +58,7 @@ def create(alert: Alert) -> int:
         )
         database.connection.commit()
         new_alert_id = cur.fetchone()[0]
-        logger.debug("Created alert #%s for user %s", new_alert_id, alert["user_id"])
+        logger.debug("Created alert #%s for user %s", new_alert_id, user_id)
         return new_alert_id
 
 

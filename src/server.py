@@ -14,17 +14,27 @@ from src.logging import logger
 logger.info("Starting Portfolio Insights backend")
 logger.info("Importing modules...")
 
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, Request, HTTPException, status, Depends
+from fastapi.exceptions import RequestValidationError
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
-from src import alerts, database
-from src.schemas import Alert
+from src import alerts, database, users
+from src.schemas import (
+    Alert,
+    Token,
+    AlertResponse,
+    UserRegister,
+    UserResponse,
+)
 from typing import List, Dict
 import os
 from dotenv import load_dotenv
 
 logger.info("Modules loaded")
 
+# OAuth2 scheme for token authentication
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 load_dotenv()
 logger.info(f"Environment loaded:")
@@ -34,7 +44,6 @@ for key, value in os.environ.items():
 cors_origins = os.getenv("CORS_ORIGINS").split(",")
 go_api_url = os.getenv("GO_API_URL")
 
-
 app = FastAPI()
 
 app.add_middleware(
@@ -43,6 +52,124 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(RequestValidationError)
+async def custom_validation_exception_handler(
+    request: Request, exc: RequestValidationError
+):
+    # Get the first validation error message, e.g., "Password must be between 4 and 50 characters."
+    first_error = exc.errors()[0]
+    message = first_error.get("msg", "Invalid input")
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail=message,
+    )
+
+
+# ------------------------------------------------------------------------#
+
+##### Authentication Endpoints #####
+
+
+@app.post("/login", response_model=Token)
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    """
+    Login endpoint that returns a JWT token for authenticated users.
+    """
+    try:
+        # Verify user credentials, raise error if user not found or password is incorrect
+        user_info = users.verify_credentials(form_data.username, form_data.password)
+        # If no error was raised, create access token
+        access_token = users.create_access_token(data=user_info)
+        return {"access_token": access_token, "token_type": "bearer"}
+    except HTTPException as http_exc:
+        # Re-raise the HTTP exception with its original status code and detail
+        raise HTTPException(status_code=http_exc.status_code, detail=http_exc.detail)
+    except Exception as e:
+        logger.error(f"Unexpected error during login: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred during login",
+        )
+
+
+@app.post(
+    "/register",
+    status_code=status.HTTP_201_CREATED,
+    response_model=Dict[str, Token | UserResponse],
+)
+async def register(user_data: UserRegister):
+    """
+    Register a new user and return a JWT token along with user information.
+    """
+    try:
+        # Register the user
+        user_info = users.register_user(user_data.username, user_data.password)
+        # Create access token for the new user
+        access_token = users.create_access_token(data=user_info)
+        return {
+            "token": {"access_token": access_token, "token_type": "bearer"},
+            "user": user_info,
+        }
+    except HTTPException as http_exc:
+        raise HTTPException(status_code=http_exc.status_code, detail=http_exc.detail)
+    except Exception as e:
+        logger.error(f"Unexpected error during registration: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred during registration",
+        )
+
+
+# ------------------------------------------------------------------------#
+
+##### Protected Endpoints #####
+
+
+# Get alerts matching optional search_term
+@app.get("/alerts", response_model=List[Dict])
+async def search_alerts(
+    search_term: str = "",
+    current_user: Dict[str, str | int] = Depends(users.get_user_from_token),
+) -> List[Dict]:
+    try:
+        return alerts.search(current_user["user_id"], search_term)
+    except Exception as e:
+        logger.error(f"Error searching alerts: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+# Endpoint to create a new alert
+@app.post("/alerts", status_code=status.HTTP_201_CREATED, response_model=AlertResponse)
+def create_alert(
+    alert: Alert,
+    current_user: Dict[str, str | int] = Depends(users.get_user_from_token),
+) -> AlertResponse:
+    try:
+        alert_id = alerts.create(alert, current_user["user_id"])
+        return AlertResponse(
+            message="Alert created successfully", new_alert_id=alert_id
+        )
+    except Exception as e:
+        logger.error(f"Error creating alert: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+# Delete alert by ID (query parameter)
+@app.delete("/alerts", response_model=AlertResponse)
+def delete_alert(
+    id: int, current_user: Dict[str, str | int] = Depends(users.get_user_from_token)
+) -> AlertResponse:
+    try:
+        # No need to check if the alert belongs to the current user because the UI prevents the user from viewing alerts for other users
+        # Ideally user authentication is implemented here to prevent deletion of alerts for other users
+        alerts.delete(id)
+        return AlertResponse(message="Alert deleted successfully", deleted_alert_id=id)
+    except Exception as e:
+        logger.error(f"Error deleting alert: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
 
 # ------------------------------------------------------------------------#
 
@@ -160,40 +287,3 @@ async def check_alert(
     except Exception as e:
         print(f"Unexpected error: {e}")
         raise HTTPException(status_code=502, detail="Market service unavailable")
-
-
-# ------------------------------------------------------------------------#
-
-##### Manage Stock Price Alerts #####
-
-
-# Get alerts matching optional search_term
-@app.get("/alerts", response_model=List[Dict])
-async def search_alerts(user_id: int, search_term: str = "") -> List[Dict]:
-    try:
-        return alerts.search(user_id, search_term)
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail="Internal server error")
-
-
-# Endpoint to create a new alert
-@app.post("/alerts", status_code=status.HTTP_201_CREATED)
-def create_alert(alert: Alert) -> Dict[str, str | int]:
-    try:
-        alert_id = alerts.create(alert)
-        return {"message": "Alert created successfully", "new_alert_id": alert_id}
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail="Internal server error")
-
-
-# Delete alert by ID (query parameter)
-@app.delete("/alerts")
-def delete_alert(id: int) -> Dict[str, str | int]:
-    try:
-        alerts.delete(id)
-        return {"message": "Alert deleted successfully", "deleted_alert_id": id}
-    except Exception as e:
-        print(e)
-        return HTTPException(status_code=500, detail="Internal server error")

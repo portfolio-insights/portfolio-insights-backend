@@ -1,7 +1,7 @@
--- The queries in this file are used to populate the `users` table with test
--- data, consisting of two users. Useful for testing.
+-- The query in this file is used to populate the `users` table with a
+-- guest user, which can be used for testing and also allows users to
+-- log in with the guest account rather than registering a new account.
 
-INSERT INTO users (username, password, created_at)
+INSERT INTO users (id, username, password, created_at)
 VALUES 
-    ('test_user', 'test123', NOW() - INTERVAL '30 days'),
-    ('demo_user', 'demo456', NOW() - INTERVAL '15 days');
+    (-1, 'Guest', 'GuestPassword', NOW() - INTERVAL '30 days');

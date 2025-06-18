@@ -29,4 +29,5 @@ echo "✅ Done."
 
 echo ""
 echo "🎉 Backend running on Docker."
+echo "🐘 Make sure your PostgreSQL database is also set up."
 echo ""
